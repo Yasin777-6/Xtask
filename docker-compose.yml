@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+    # Uncomment if you want to use PostgreSQL instead of SQLite
+    # depends_on:
+    #   - db
+    # environment:
+    #   - DATABASE_URL=postgresql://postgres:postgres@db:5432/taskdb
+
+  # Uncomment for PostgreSQL support
+  # db:
+  #   image: postgres:15
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data/
+  #   environment:
+  #     - POSTGRES_DB=taskdb
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+
+# volumes:
+#   postgres_data:
+
