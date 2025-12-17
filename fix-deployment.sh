@@ -47,6 +47,9 @@ pip install -r requirements.txt
 pip install gunicorn
 
 # Step 6: Run migrations and collect static files
+echo "[6/8] Creating migrations (if needed)..."
+sudo -u $APP_USER $PROJECT_DIR/venv/bin/python manage.py makemigrations --noinput || true
+
 echo "[6/8] Running database migrations..."
 sudo -u $APP_USER $PROJECT_DIR/venv/bin/python manage.py migrate --noinput
 
