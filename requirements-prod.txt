@@ -1,0 +1,20 @@
+# Production requirements for Xtask backend
+# Include base requirements plus production dependencies
+
+-r requirements.txt
+
+# Production server
+gunicorn==21.2.0
+
+# PostgreSQL adapter
+psycopg2-binary==2.9.9
+
+# Environment variables
+python-decouple==3.8
+
+# Security
+django-cors-headers==4.3.1
+
+# Monitoring (optional)
+# sentry-sdk==1.38.0
+
