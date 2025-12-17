@@ -17,11 +17,11 @@ NC='\033[0m' # No Color
 # Configuration variables (modify these as needed)
 PROJECT_NAME="xtask"
 PROJECT_DIR="/var/www/${PROJECT_NAME}"
-BACKEND_DIR="${PROJECT_DIR}/backend"
+BACKEND_DIR="${PROJECT_DIR}"  # Django files are in project root
 FRONTEND_DIR="${PROJECT_DIR}/frontend"
 DOMAIN_NAME=""  # Set your domain name here, or leave empty for IP-based
 EMAIL=""  # For Let's Encrypt SSL
-GIT_REPO=""  # Optional: Your Git repository URL
+GIT_REPO="https://github.com/Yasin777-6/Xtask.git"  # Git repository URL
 
 # User configuration
 APP_USER="www-data"
@@ -101,7 +101,6 @@ nginx -v
 # Create project directory
 print_info "Creating project directory..."
 mkdir -p ${PROJECT_DIR}
-mkdir -p ${BACKEND_DIR}
 mkdir -p ${FRONTEND_DIR}
 mkdir -p /var/log/${PROJECT_NAME}
 
@@ -119,9 +118,14 @@ chmod -R 755 ${PROJECT_DIR}
 print_info "Setting up project files..."
 if [ -n "$GIT_REPO" ]; then
     print_info "Cloning from Git repository..."
-    sudo -u ${APP_USER} git clone ${GIT_REPO} ${PROJECT_DIR}/temp
-    cp -r ${PROJECT_DIR}/temp/* ${PROJECT_DIR}/
-    rm -rf ${PROJECT_DIR}/temp
+    if [ -d "${PROJECT_DIR}/.git" ]; then
+        print_info "Repository already exists, pulling latest changes..."
+        cd ${PROJECT_DIR}
+        git pull origin main
+    else
+        print_info "Cloning repository..."
+        git clone ${GIT_REPO} ${PROJECT_DIR}
+    fi
 else
     print_warning "No Git repository specified. Please copy your project files to ${PROJECT_DIR}"
     print_info "Waiting 10 seconds for you to copy files..."
@@ -131,13 +135,15 @@ fi
 # Backend Setup
 print_info "Setting up Django backend..."
 
+# Navigate to project directory
+cd ${PROJECT_DIR}
+
 # Create virtual environment
-sudo -u ${APP_USER} python3 -m venv ${BACKEND_DIR}/venv
-source ${BACKEND_DIR}/venv/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 
 # Install Python dependencies
 print_info "Installing Python dependencies..."
-cd ${BACKEND_DIR}
 pip install --upgrade pip
 pip install -r requirements.txt
 
@@ -146,7 +152,7 @@ pip install gunicorn psycopg2-binary
 
 # Create .env file for backend
 print_info "Creating backend environment file..."
-cat > ${BACKEND_DIR}/.env << EOF
+cat > ${PROJECT_DIR}/.env << EOF
 DEBUG=False
 SECRET_KEY=$(python3 -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
 ALLOWED_HOSTS=${DOMAIN_NAME:-13.60.60.1},localhost,127.0.0.1
@@ -160,11 +166,11 @@ print_info "Updating Django settings for production..."
 
 # Run migrations
 print_info "Running database migrations..."
-sudo -u ${APP_USER} ${BACKEND_DIR}/venv/bin/python manage.py migrate --noinput
+${PROJECT_DIR}/venv/bin/python manage.py migrate --noinput
 
 # Collect static files
 print_info "Collecting static files..."
-sudo -u ${APP_USER} ${BACKEND_DIR}/venv/bin/python manage.py collectstatic --noinput
+${PROJECT_DIR}/venv/bin/python manage.py collectstatic --noinput
 
 # Create superuser (optional, commented out)
 # print_info "Creating superuser..."
@@ -213,9 +219,9 @@ After=network.target
 [Service]
 User=${APP_USER}
 Group=${APP_USER}
-WorkingDirectory=${BACKEND_DIR}
-Environment="PATH=${BACKEND_DIR}/venv/bin"
-ExecStart=${BACKEND_DIR}/venv/bin/gunicorn \\
+WorkingDirectory=${PROJECT_DIR}
+Environment="PATH=${PROJECT_DIR}/venv/bin"
+ExecStart=${PROJECT_DIR}/venv/bin/gunicorn \\
     --workers 3 \\
     --bind 127.0.0.1:8000 \\
     --access-logfile /var/log/${PROJECT_NAME}/access.log \\
@@ -277,14 +283,14 @@ server {
 
     # Django admin static files
     location /static/ {
-        alias ${BACKEND_DIR}/staticfiles/;
+        alias ${PROJECT_DIR}/staticfiles/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
 
     # Django admin media files (if needed)
     location /media/ {
-        alias ${BACKEND_DIR}/media/;
+        alias ${PROJECT_DIR}/media/;
     }
 
     # Health check
