@@ -19,15 +19,30 @@ Complete guide for deploying Xtask on Ubuntu VPS (AWS EC2, DigitalOcean, etc.)
 # 1. SSH into server
 ssh user@13.60.60.1
 
-# 2. Clone repository from GitHub
+# 2. Create /var/www directory if it doesn't exist
+sudo mkdir -p /var/www
+sudo chmod 755 /var/www
+
+# 3. Clone repository from GitHub
+# Option A: Clone directly to /var/www with sudo (recommended)
 cd /var/www
 sudo git clone https://github.com/Yasin777-6/Xtask.git xtask
+sudo chown -R $USER:$USER /var/www/xtask  # Fix ownership
 cd xtask
 
-# 3. Make script executable
+# Option B: Clone to home directory first, then move
+# git clone https://github.com/Yasin777-6/Xtask.git ~/xtask
+# sudo mv ~/xtask /var/www/xtask
+# cd /var/www/xtask
+
+# 4. Verify you're in the right place
+pwd  # Should show: /var/www/xtask
+ls -la  # Should show project files
+
+# 5. Make script executable
 chmod +x deploy.sh
 
-# 4. Run deployment script
+# 6. Run deployment script
 sudo ./deploy.sh
 ```
 
@@ -92,13 +107,58 @@ sudo ufw enable
 ### 4. Clone Project from GitHub
 
 ```bash
-# Clone the repository
+# Create /var/www directory if it doesn't exist
+sudo mkdir -p /var/www
+sudo chmod 755 /var/www
+
+# Clone the repository (use sudo since /var/www requires root permissions)
 cd /var/www
 sudo git clone https://github.com/Yasin777-6/Xtask.git xtask
+
+# Fix ownership so you can work with the files
+sudo chown -R $USER:$USER /var/www/xtask
+
+# Navigate into the project
 cd xtask
 
 # Verify the repository was cloned successfully
 ls -la
+pwd  # Should show: /var/www/xtask
+```
+
+**Alternative Method** (if you prefer not to use sudo for git):
+
+```bash
+# Clone to your home directory first
+cd ~
+git clone https://github.com/Yasin777-6/Xtask.git xtask
+
+# Create /var/www if it doesn't exist
+sudo mkdir -p /var/www
+
+# Move the cloned repository
+sudo mv ~/xtask /var/www/xtask
+
+# Fix ownership
+sudo chown -R $USER:$USER /var/www/xtask
+
+# Navigate into the project
+cd /var/www/xtask
+```
+
+**Troubleshooting Permission Issues:**
+
+If you get "Permission denied" errors:
+
+```bash
+# Check current permissions
+ls -ld /var/www
+
+# Fix permissions if needed
+sudo chmod 755 /var/www
+
+# If you cloned with sudo, fix ownership:
+sudo chown -R $USER:$USER /var/www/xtask
 ```
 
 **Alternative: Upload via SCP (if you prefer)**
