@@ -119,12 +119,14 @@ print_info "Setting up project files..."
 if [ -n "$GIT_REPO" ]; then
     print_info "Cloning from Git repository..."
     if [ -d "${PROJECT_DIR}/.git" ]; then
-        print_info "Repository already exists, pulling latest changes..."
+        print_info "Repository already exists, fixing ownership and pulling latest changes..."
+        chown -R ${APP_USER}:${APP_USER} ${PROJECT_DIR}
         cd ${PROJECT_DIR}
-        git pull origin main
+        sudo -u ${APP_USER} git config --global --add safe.directory ${PROJECT_DIR}
+        sudo -u ${APP_USER} git pull origin main
     else
         print_info "Cloning repository..."
-        git clone ${GIT_REPO} ${PROJECT_DIR}
+        sudo -u ${APP_USER} git clone ${GIT_REPO} ${PROJECT_DIR}
     fi
 else
     print_warning "No Git repository specified. Please copy your project files to ${PROJECT_DIR}"
@@ -132,11 +134,23 @@ else
     sleep 10
 fi
 
+# Fix ownership after cloning
+chown -R ${APP_USER}:${APP_USER} ${PROJECT_DIR}
+
 # Backend Setup
 print_info "Setting up Django backend..."
 
 # Navigate to project directory
 cd ${PROJECT_DIR}
+
+# Verify requirements.txt exists
+if [ ! -f "requirements.txt" ]; then
+    print_error "requirements.txt not found in ${PROJECT_DIR}"
+    print_info "Current directory: $(pwd)"
+    print_info "Files in directory:"
+    ls -la
+    exit 1
+fi
 
 # Create virtual environment
 python3 -m venv venv
