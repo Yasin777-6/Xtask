@@ -104,16 +104,17 @@ const TaskForm = ({ onSubmit, onCancel }) => {
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
             />
 
-            {/* Form */}
-            <motion.form
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              onSubmit={handleSubmit}
-              onClick={(e) => e.stopPropagation()}
-              className="fixed inset-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-md w-full z-50 glass rounded-2xl shadow-2xl p-6 space-y-4"
-            >
+            {/* Form Wrapper - handles centering */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
+              <motion.form
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                onSubmit={handleSubmit}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md glass rounded-2xl shadow-2xl p-6 space-y-4"
+              >
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gradient font-display">
@@ -196,7 +197,8 @@ const TaskForm = ({ onSubmit, onCancel }) => {
                   {isSubmitting ? 'Creating...' : 'Create Task'}
                 </motion.button>
               </div>
-            </motion.form>
+              </motion.form>
+            </div>
           </>
         )}
       </AnimatePresence>
