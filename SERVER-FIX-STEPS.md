@@ -10,7 +10,15 @@ cd /var/www/xtask
 ## Step 2: Fix Git and pull latest code
 ```bash
 sudo git config --global --add safe.directory /var/www/xtask
+
+# Stash or discard local changes (choose one):
+# Option A: Stash changes (to keep them for later)
 git stash
+
+# Option B: Discard local changes (if you don't need them)
+# git reset --hard HEAD
+
+# Now pull the latest code
 git pull origin main
 ```
 
