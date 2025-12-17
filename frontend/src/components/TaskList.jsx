@@ -107,7 +107,7 @@ const TaskList = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="space-y-4"
+            className="space-y-4 flex flex-col items-center"
           >
             <AnimatePresence mode="popLayout">
               {tasks.map((task, index) => (
@@ -116,6 +116,7 @@ const TaskList = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
+                  className="w-full max-w-2xl"
                 >
                   <TaskItem
                     task={task}
