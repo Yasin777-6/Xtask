@@ -5,10 +5,10 @@ After=network.target postgresql.service
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/xtask/backend
-Environment="PATH=/var/www/xtask/backend/venv/bin"
+WorkingDirectory=/var/www/xtask
+Environment="PATH=/var/www/xtask/venv/bin"
 Environment="DJANGO_SETTINGS_MODULE=xtask.settings"
-ExecStart=/var/www/xtask/backend/venv/bin/gunicorn \
+ExecStart=/var/www/xtask/venv/bin/gunicorn \
     --workers 3 \
     --worker-class sync \
     --timeout 120 \
