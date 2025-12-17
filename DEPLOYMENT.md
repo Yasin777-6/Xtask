@@ -8,13 +8,33 @@ Complete guide for deploying Xtask on Ubuntu VPS (AWS EC2, DigitalOcean, etc.)
 - Root or sudo access
 - Domain name (optional, can use IP address)
 - SSH access to server
+- Git installed on server (usually pre-installed)
+- GitHub repository: [https://github.com/Yasin777-6/Xtask](https://github.com/Yasin777-6/Xtask)
 
 ## 🎯 Quick Deployment
 
 ### Option 1: Automated Script (Recommended)
 
 ```bash
-# 1. Upload project files to server
+# 1. SSH into server
+ssh user@13.60.60.1
+
+# 2. Clone repository from GitHub
+cd /var/www
+sudo git clone https://github.com/Yasin777-6/Xtask.git xtask
+cd xtask
+
+# 3. Make script executable
+chmod +x deploy.sh
+
+# 4. Run deployment script
+sudo ./deploy.sh
+```
+
+**Alternative: Upload via SCP**
+
+```bash
+# 1. Upload project files to server (from your local machine)
 scp -r . user@13.60.60.1:/tmp/xtask
 
 # 2. SSH into server
@@ -22,9 +42,9 @@ ssh user@13.60.60.1
 
 # 3. Move files to deployment location
 sudo mv /tmp/xtask /var/www/xtask
+cd /var/www/xtask
 
 # 4. Make script executable
-cd /var/www/xtask
 chmod +x deploy.sh
 
 # 5. Run deployment script
@@ -69,21 +89,37 @@ sudo ufw allow 443/tcp
 sudo ufw enable
 ```
 
-### 4. Upload Project Files
+### 4. Clone Project from GitHub
+
+```bash
+# Clone the repository
+cd /var/www
+sudo git clone https://github.com/Yasin777-6/Xtask.git xtask
+cd xtask
+
+# Verify the repository was cloned successfully
+ls -la
+```
+
+**Alternative: Upload via SCP (if you prefer)**
 
 ```bash
 # On your local machine
-scp -r . user@13.60.60.1:/var/www/xtask
+scp -r . user@13.60.60.1:/tmp/xtask
 
-# Or use Git
-cd /var/www
-sudo git clone YOUR_REPO_URL xtask
+# Then on server
+sudo mv /tmp/xtask /var/www/xtask
 ```
 
 ### 5. Backend Setup
 
 ```bash
+# Navigate to project directory
 cd /var/www/xtask
+
+# Verify you're in the correct directory
+pwd  # Should show: /var/www/xtask
+ls -la  # Should show project files
 
 # Create virtual environment
 python3 -m venv venv
@@ -316,10 +352,11 @@ curl http://localhost/health
 ```bash
 cd /var/www/xtask
 
-# Pull latest changes (if using Git)
-sudo git pull
+# Pull latest changes from GitHub
+sudo git pull origin main
 
 # Update backend
+cd /var/www/xtask
 source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
@@ -331,6 +368,18 @@ cd frontend
 npm install
 npm run build
 sudo systemctl restart nginx
+```
+
+**Note**: If you encounter merge conflicts or need to reset:
+
+```bash
+# Backup current state
+sudo cp -r /var/www/xtask /var/www/xtask.backup
+
+# Reset to latest from GitHub (WARNING: This will discard local changes)
+cd /var/www/xtask
+sudo git fetch origin
+sudo git reset --hard origin/main
 ```
 
 ### Backup Database
@@ -420,8 +469,65 @@ VITE_API_URL=http://13.60.60.1/api
 If using a domain name:
 
 1. Add A record pointing to `13.60.60.1`
-2. Wait for DNS propagation
+2. Wait for DNS propagation (usually 5-30 minutes)
 3. Run certbot for SSL
+
+## 📦 Git Repository Information
+
+**Repository URL**: [https://github.com/Yasin777-6/Xtask](https://github.com/Yasin777-6/Xtask)
+
+### Cloning the Repository
+
+```bash
+# Clone to default location
+git clone https://github.com/Yasin777-6/Xtask.git
+
+# Clone to specific directory
+git clone https://github.com/Yasin777-6/Xtask.git /var/www/xtask
+
+# Clone specific branch (if needed)
+git clone -b main https://github.com/Yasin777-6/Xtask.git
+```
+
+### Keeping Repository Updated
+
+```bash
+# Check current status
+cd /var/www/xtask
+git status
+
+# Fetch latest changes
+git fetch origin
+
+# View available branches
+git branch -a
+
+# Pull latest changes
+git pull origin main
+
+# View commit history
+git log --oneline -10
+```
+
+### Working with Git on Server
+
+If you need to make changes and push back to GitHub:
+
+```bash
+# Configure Git (if not already done)
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# Create a new branch for changes
+git checkout -b server-changes
+
+# Make your changes, then commit
+git add .
+git commit -m "Server configuration changes"
+
+# Push to GitHub (if you have write access)
+git push origin server-changes
+```
 
 ## 📞 Support
 
@@ -430,6 +536,16 @@ For issues:
 2. Verify all services are running
 3. Check firewall rules
 4. Review configuration files
+5. Check GitHub repository for updates: [https://github.com/Yasin777-6/Xtask](https://github.com/Yasin777-6/Xtask)
+
+## 🔗 Quick Links
+
+- **GitHub Repository**: [https://github.com/Yasin777-6/Xtask](https://github.com/Yasin777-6/Xtask)
+- **Clone Command**: `git clone https://github.com/Yasin777-6/Xtask.git`
+- **Repository Structure**: 
+  - `/backend` - Django REST Framework API
+  - `/frontend` - React frontend application
+  - `/deploy.sh` - Automated deployment script
 
 ---
 
@@ -439,4 +555,6 @@ Your application should now be accessible at:
 - **Frontend**: http://13.60.60.1 (or https://your-domain.com)
 - **Backend API**: http://13.60.60.1/api (or https://your-domain.com/api)
 - **Admin Panel**: http://13.60.60.1/admin (or https://your-domain.com/admin)
+
+**Repository**: All code is available at [https://github.com/Yasin777-6/Xtask](https://github.com/Yasin777-6/Xtask)
 
